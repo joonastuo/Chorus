@@ -20,7 +20,7 @@ class LFO
 public:
     LFO();
     ~LFO();
-	void prepare(dsp::ProcessSpec spec);
+	void prepare(const float& sampleRate, const float& maximumBlockSize);
 	float getValue();
 	void setFreq(const float& freq);
 	void setUnipolar(const bool& isUnipolar);

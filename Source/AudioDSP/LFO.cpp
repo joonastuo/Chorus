@@ -95,10 +95,10 @@ LFO::~LFO()
 	// Empty destructor
 }
 
-void LFO::prepare(dsp::ProcessSpec spec)
+void LFO::prepare(const float& sampleRate, const float& maximumBlockSize)
 {
-	mSampleRate = spec.sampleRate;
-	mSamplesPerBlock = spec.maximumBlockSize;
+	mSampleRate		 = sampleRate;
+	mSamplesPerBlock = maximumBlockSize;
 }
 
 float LFO::getValue()
