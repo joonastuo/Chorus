@@ -26,137 +26,111 @@ Chorus::~Chorus()
 //==============================================================================
 void Chorus::prepare(const float & sampleRate, const int & samplesPerBlock, const int & numChannels)
 {
+	float W = *mState.getRawParameterValue(IDs::wetness);
+	float FBL = *mState.getRawParameterValue(IDs::feedbackL);
+	float FBC = *mState.getRawParameterValue(IDs::feedbackC);
+	float FBR = *mState.getRawParameterValue(IDs::feedbackR);
+
 	// Set values to member variables ===============
 	mSampleRate = sampleRate;
 	mSamplesPerBlock = samplesPerBlock;
 	mNumChannels = numChannels;
 	// Set to be maximum delay value + safety!!!
 	mDelayBufferLen = 2 * (mSampleRate + mSamplesPerBlock);
+	mCenterBuffer.setSize(1, samplesPerBlock);
 
-	// Prepare delay lines ==========================
-	for (auto& dline : delayLines)
-	{
-		dline.resize(mDelayBufferLen);
-		dline.clear();
-	}
+	mLeftDelay.prepareDelay(mDelayBufferLen);
+	mCenterDelay.prepareDelay(mDelayBufferLen);
+	mRightDelay.prepareDelay(mDelayBufferLen);
 
-	// Prepare LFOs for delay lines =================
-	for (auto& lfo : mLFOs)
-	{
-		lfo.prepare(sampleRate, samplesPerBlock);
-		lfo.setWaveform(0);
-		lfo.setUnipolar(true);
-		lfo.setFreq(5);
-	}
+	mLeftDelay.prepareGain(samplesPerBlock, W, FBL);
+	mCenterDelay.prepareGain(samplesPerBlock, W, FBC);
+	mRightDelay.prepareGain(samplesPerBlock, W, FBR);
 
-	// Set phase shift to first delay line ==========
-	float phase = *mState.getRawParameterValue(IDs::lfoPhase);
-	mLFOs[0].setPhase(phase);
+	float lfoFreqL = *mState.getRawParameterValue(IDs::lfoFreqL);
+	float lfoFreqC = *mState.getRawParameterValue(IDs::lfoFreqC);
+	float lfoFreqR = *mState.getRawParameterValue(IDs::lfoFreqR);
 
-	// Prepare smoothed values ======================
-	float feedback = *mState.getRawParameterValue(IDs::feedback);
-	float wet	   = *mState.getRawParameterValue(IDs::wetness);
+	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
+	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
+	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
 
-	float FB = feedback / 100.f;
-	float W  = (wet / 100.f) * 0.5f;
-	float G  = 1 - W;
+	float lfoPhaseL = 90.f;
+	float lfoPhaseC = 0.f;
+	float lfoPhaseR = 270.f;
 
-	for (int delayLine = 0; delayLine < mNumDelayLines; ++delayLine)
-	{
-		mSmoothFB[delayLine].reset(mSamplesPerBlock);
-		mSmoothW[delayLine] .reset(mSamplesPerBlock);
-		mSmoothG[delayLine] .reset(mSamplesPerBlock);
+	mLeftDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseL, lfoFreqL, lfoDepthL);
+	mCenterDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseC, lfoFreqC, lfoDepthC);
+	mRightDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseR, lfoFreqR, lfoDepthR);
 
-		mSmoothFB[delayLine].setCurrentAndTargetValue(FB);
-		mSmoothW[delayLine] .setCurrentAndTargetValue(W);
-		mSmoothG[delayLine] .setCurrentAndTargetValue(G);
-	}
+
+	// Filters
+	float hpFreq = *mState.getRawParameterValue(IDs::hpFreq);
+	float lpFreq = *mState.getRawParameterValue(IDs::lpFreq);
+
+	mLeftDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
+	mCenterDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
+	mRightDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
 }
 
 //==============================================================================
 void Chorus::process(AudioBuffer<float>& buffer)
 {
-	// Get user parameters ==========================
-	float feedback = *mState.getRawParameterValue(IDs::feedback);
-	float wet = *mState.getRawParameterValue(IDs::wetness);
-	float time = *mState.getRawParameterValue(IDs::time);
-	float lfoFreq = *mState.getRawParameterValue(IDs::lfoFreq);
-	float phase = *mState.getRawParameterValue(IDs::lfoPhase);
-	int waveform = *mState.getRawParameterValue(IDs::lfoWaveform);
-	bool effectOn = *mState.getRawParameterValue(IDs::onOff);
+	updateParameters();
 
-	// Set phase shift to first channel =============
-	mLFOs[0].setPhase(phase);
+	// Left and right input
+	const float* leftInput = buffer.getReadPointer(0);
+	const float* rightInput = buffer.getReadPointer(0);
+	if (buffer.getNumChannels() == 2)
+		rightInput = buffer.getReadPointer(1);
+	else if (buffer.getNumChannels() > 2)
+		return;
 
-	// Transform values form % to values from 0 to 1
-	float FB = feedback / 100.f;
-	// Wet/dry from 0/100 to 50/50
-	float W = (wet / 100.f) * 0.5f;
-	float G = 1 - W;
+	// Middle
+	mCenterBuffer.copyFromWithRamp(0, 0, leftInput, buffer.getNumSamples(), 0.5f, 0.5f);
+	mCenterBuffer.copyFromWithRamp(0, 0, rightInput, buffer.getNumSamples(), 0.5f, 0.5f);
+	
+	const float* centerInput = mCenterBuffer.getWritePointer(0);
 
-	// Set gain values ==============================
-	for (int channel = 0; channel < 2; ++channel)
-	{
-		mSmoothFB[channel].setValue(FB);
-		mSmoothW[channel].setValue(W);
-		mSmoothG[channel].setValue(G);
-	}
+	float* leftOutput = buffer.getWritePointer(0);
+	float* rightOutput = buffer.getWritePointer(1);
+	float* centerOutput = mCenterBuffer.getWritePointer(0);
 
-	// Effect processing loop =======================
-	for (auto channel = 0; channel < buffer.getNumChannels(); ++channel)
-	{
-		// Get channel LFO
-		auto& lfo = mLFOs[channel];
-		lfo.setFreq(lfoFreq);
-		lfo.setWaveform(waveform);
+	mLeftDelay  .process(leftInput  , leftOutput);
+	mCenterDelay.process(centerInput, centerOutput);
+	mRightDelay .process(rightInput , rightOutput);
 
-		// Get channel input and output buffer
-		const float* input = buffer.getReadPointer(channel);
-		float* output = buffer.getWritePointer(channel);
-
-		// Iterate trough samples in a channel
-		for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
-		{
-			// Get smoothed gain values
-			FB = mSmoothFB[channel].getNextValue();
-			W = mSmoothW[channel].getNextValue();
-			G = mSmoothG[channel].getNextValue();
-
-			// Get delay amount
-			float delayTime = time * lfo.getValue();
-			lfo.advanceSamples(1);
-			float delayInSamplesFrac = mSampleRate * (delayTime / 1000.f);
-			int delayInSamplesInt = static_cast<int> (delayInSamplesFrac);
-			float delayFrac = delayInSamplesFrac - delayInSamplesInt;
-
-			// Get delayed sample
-			float delayedSample = 0.f;
-			// Fractal delay with liner interpolation if neede
-			if (delayFrac != 0)
-			{
-				float y0 = delayLines[channel].get(delayInSamplesInt);
-				float ym1 = delayLines[channel].get(delayInSamplesInt + 1);
-				delayedSample = linearInterp(y0, ym1, delayFrac);
-			}
-			else
-			{
-				delayedSample = delayLines[channel].get(delayInSamplesInt);
-			}
-
-			auto inputSample = input[sample];
-
-			// Add input and feedback to delayLine
-			delayLines[channel].push(inputSample + delayedSample * FB);
-
-			// Mix dry and wet input
-			output[sample] = inputSample * G + delayedSample * W;
-		}
-	}
-
+	buffer.addFrom(0, 0, centerOutput, mCenterBuffer.getNumSamples());
+	buffer.addFrom(1, 0, centerOutput, mCenterBuffer.getNumSamples());
 }
 
-//==============================================================================
-float Chorus::linearInterp(const float & y0, const float & yp1, const float & frac)
+void Chorus::updateParameters()
 {
-	return yp1 * frac + y0 * (1 - frac);
+	float wetness = *mState.getRawParameterValue(IDs::wetness);
+
+	float W = wetness / 100.f;
+
+	float FeedbackL = *mState.getRawParameterValue(IDs::feedbackL);
+	float FeedbackC = *mState.getRawParameterValue(IDs::feedbackC);
+	float FeedbackR = *mState.getRawParameterValue(IDs::feedbackR);
+
+	float FBL = FeedbackL / 100.f;
+	float FBC = FeedbackC / 100.f;
+	float FBR = FeedbackR / 100.f;
+
+	float lfoFreqL = *mState.getRawParameterValue(IDs::lfoFreqL);
+	float lfoFreqC = *mState.getRawParameterValue(IDs::lfoFreqC);
+	float lfoFreqR = *mState.getRawParameterValue(IDs::lfoFreqR);
+
+	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
+	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
+	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
+
+	// Filters
+	float hpFreq = *mState.getRawParameterValue(IDs::hpFreq);
+	float lpFreq = *mState.getRawParameterValue(IDs::lpFreq);
+
+	mLeftDelay.update(lfoFreqL, lfoDepthL, W, FBL, lpFreq, hpFreq);
+	mCenterDelay.update(lfoFreqC, lfoDepthC, W, FBC, lpFreq, hpFreq);
+	mRightDelay.update(lfoFreqR, lfoDepthR, W, FBR, lpFreq, hpFreq);
 }

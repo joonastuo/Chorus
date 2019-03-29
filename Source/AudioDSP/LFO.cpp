@@ -131,6 +131,8 @@ float LFO::getValue()
 		break;
 	}
 
+	LFOVal *= mDepth;
+
 	if (mUnipolar)
 	{
 		LFOVal /= 2;
@@ -180,5 +182,10 @@ float LFO::linearInterp(const float & y0, const float & yp1, const float & frac)
 void LFO::setPhase(const float & phase)
 {
 	mPhase = phase;
+}
+
+void LFO::setDepth(const float & depth)
+{
+	mDepth = depth / 100.f;
 }
 

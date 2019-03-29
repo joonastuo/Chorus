@@ -17,11 +17,16 @@
         <FILE id="WC9i46" name="DelayLine.h" compile="0" resource="0" file="Source/AudioDSP/DelayLine.h"/>
         <FILE id="uIMAop" name="LFO.cpp" compile="1" resource="0" file="Source/AudioDSP/LFO.cpp"/>
         <FILE id="gAKPSY" name="LFO.h" compile="0" resource="0" file="Source/AudioDSP/LFO.h"/>
+        <FILE id="QyUNUh" name="ModDelay.cpp" compile="1" resource="0" file="Source/AudioDSP/ModDelay.cpp"/>
+        <FILE id="IxiYqF" name="ModDelay.h" compile="0" resource="0" file="Source/AudioDSP/ModDelay.h"/>
       </GROUP>
       <GROUP id="{313998FB-D6B8-63C0-7AA7-28C3ED7DB72F}" name="Helper">
         <FILE id="kn0O7X" name="Identifiers.h" compile="0" resource="0" file="Source/Helper/Identifiers.h"/>
       </GROUP>
-      <GROUP id="{4037FF40-341F-A0ED-5C4A-AF7F9D9D1732}" name="LookAndFeel"/>
+      <GROUP id="{4037FF40-341F-A0ED-5C4A-AF7F9D9D1732}" name="LookAndFeel">
+        <FILE id="GLNuYU" name="KnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/LookAndFeel/KnobLookAndFeel.h"/>
+      </GROUP>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -45,6 +50,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2017 targetFolder="Builds/VisualStudio2017">
@@ -67,6 +73,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
@@ -81,6 +88,7 @@
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
