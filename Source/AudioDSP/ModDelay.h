@@ -23,14 +23,11 @@ public:
 	void prepareDelay(const int& delayLineSize);
 	void prepareLFO(const float& sampleRate, const float& samplesPerBlock, const float& phase, const float& freq, const float& depth);
 	void prepareGain(const int& samplesPerBlock, const float& W, const float& FB);
-	void prepareFilters(const int& sampleRate, const float& lpFreq, const float& hpFreq);
 	void update(const float& LFOFreq, const float& LFODepth, const float& W, const float& FB, const float& lpFreq, const float& hpFreq);
 	void process(const float* input, float* output);
 
 private:
 	float linearInterp(const float& y0, const float& yp1, const float& frac);
-	IIRFilter mLowPass;
-	IIRFilter mHighPass;
 	DelayLine<float> mDelayLine;
 	LFO mLFO;
 	SmoothedValue<float> mSmoothG;

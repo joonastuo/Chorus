@@ -62,15 +62,6 @@ void Chorus::prepare(const float & sampleRate, const int & samplesPerBlock, cons
 	mLeftDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseL, lfoFreqL, lfoDepthL);
 	mCenterDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseC, lfoFreqC, lfoDepthC);
 	mRightDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseR, lfoFreqR, lfoDepthR);
-
-
-	// Filters
-	float hpFreq = *mState.getRawParameterValue(IDs::hpFreq);
-	float lpFreq = *mState.getRawParameterValue(IDs::lpFreq);
-
-	mLeftDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
-	mCenterDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
-	mRightDelay.prepareFilters(sampleRate, lpFreq, hpFreq);
 }
 
 //==============================================================================
@@ -125,12 +116,4 @@ void Chorus::updateParameters()
 	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
 	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
 	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
-
-	// Filters
-	float hpFreq = *mState.getRawParameterValue(IDs::hpFreq);
-	float lpFreq = *mState.getRawParameterValue(IDs::lpFreq);
-
-	mLeftDelay.update(lfoFreqL, lfoDepthL, W, FBL, lpFreq, hpFreq);
-	mCenterDelay.update(lfoFreqC, lfoDepthC, W, FBC, lpFreq, hpFreq);
-	mRightDelay.update(lfoFreqR, lfoDepthR, W, FBR, lpFreq, hpFreq);
 }

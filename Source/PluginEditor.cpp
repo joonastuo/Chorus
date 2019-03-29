@@ -31,7 +31,7 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 {
 	// Fill background
 	Colour bgColour = getLookAndFeel().findColour(ResizableWindow::backgroundColourId);
-    g.fillAll (Colours::silver.brighter(.4f).contrasting(.2f));
+    g.fillAll (bgColour.brighter(.1f));
 	
 	// Plugin area
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
@@ -65,7 +65,7 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 	// Draw lines around the title
 	drawTitleLines(g, titleArea.toFloat());
 	// Draw title text
-	g.setColour(Colours::antiquewhite);
+	g.setColour(Colours::antiquewhite.brighter(.4f));
 	g.setFont(Font("Pacifico", 50, Font::plain));
 	g.drawFittedText("LCR Chorus", titleArea, Justification::centred, 1);
 
@@ -150,29 +150,6 @@ void ChorusAudioProcessorEditor::resized()
 	auto mixArea = controlArea.removeFromRight(mSliderWidth);
 	mixBox.performLayout(mixArea.toFloat());
 
-	// Higpass ===========================
-	FlexBox hpBox;
-	hpBox.alignContent = FlexBox::AlignContent::center;
-	hpBox.justifyContent = FlexBox::JustifyContent::center;
-	hpBox.flexDirection = FlexBox::Direction::column;
-	hpBox.items.addArray(
-		{
-			FlexItem(mHighPassLabel) .withWidth(mLabelWidht) .withHeight(mLabelHeight),
-			FlexItem(mHighPassSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
-		});
-
-	// LowPass ============================
-	FlexBox lpBox;
-	lpBox.alignContent = FlexBox::AlignContent::center;
-	lpBox.justifyContent = FlexBox::JustifyContent::center;
-	lpBox.flexDirection = FlexBox::Direction::column;
-	lpBox.items.addArray(
-		{
-			FlexItem(mLowPassLabel) .withWidth(mLabelWidht) .withHeight(mLabelHeight),
-			FlexItem(mLowPassSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
-		});
-
-
 	//LCR box
 	FlexBox LCRBox;
 	LCRBox.alignContent = FlexBox::AlignContent::center;
@@ -250,10 +227,11 @@ void ChorusAudioProcessorEditor::resized()
 //==============================================================================
 void ChorusAudioProcessorEditor::initialiseGUI()
 {
+	Colour labelColour = Colours::antiquewhite.brighter(.4f);
 	// MIX =====================================
 	// Label
 	mMixLabel.setText("Mix", dontSendNotification);
-	mMixLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mMixLabel.setColour(Label::textColourId, labelColour);
 	mMixLabel.setSize(mLabelWidht, mLabelHeight);
 	mMixLabel.setFont(mLabelFont);
 	mMixLabel.setJustificationType(Justification::centred);
@@ -266,38 +244,6 @@ void ChorusAudioProcessorEditor::initialiseGUI()
 	addAndMakeVisible(mMixSlider);
 	mMixSliderAttachment.reset(new SliderAttachment(mState, IDs::wetness, mMixSlider));
 	mMixSlider.setLookAndFeel(&mKnobLookAndFeel);
-
-	// HIGH PASS FILTER ========================
-	// Label
-	mHighPassLabel.setText("Highpass", dontSendNotification);
-	mHighPassLabel.setSize(mLabelWidht, mLabelHeight);
-	mHighPassLabel.setFont(mLabelFont);
-	mHighPassLabel.setJustificationType(Justification::centred);
-	//addAndMakeVisible(mHighPassLabel);
-	// Slider
-	mHighPassSlider.setSliderStyle(mSliderStyle);
-	mHighPassSlider.setSize(mSliderWidth, mSliderHeight);
-	mHighPassSlider.setTextBoxStyle(Slider::TextBoxBelow, false, mTextBoxWidth, mTextBoxHeight);
-	mHighPassSlider.setTextValueSuffix(" Hz");
-	//addAndMakeVisible(mHighPassSlider);
-	mHighPassSliderAttachment.reset(new SliderAttachment(mState, IDs::hpFreq, mHighPassSlider));
-	mHighPassSlider.setLookAndFeel(&mKnobLookAndFeel);
-	
-	// LOW PASS FILTER =========================
-	// Label
-	mLowPassLabel.setText("Lowpass", dontSendNotification);
-	mLowPassLabel.setSize(mLabelWidht, mLabelHeight);
-	mLowPassLabel.setFont(mLabelFont);
-	mLowPassLabel.setJustificationType(Justification::centred);
-	//addAndMakeVisible(mLowPassLabel);
-	// Slider
-	mLowPassSlider.setSliderStyle(mSliderStyle);
-	mLowPassSlider.setSize(mSliderWidth, mSliderHeight);
-	mLowPassSlider.setTextBoxStyle(Slider::TextBoxBelow, false, mTextBoxWidth, mTextBoxHeight);
-	mLowPassSlider.setTextValueSuffix(" Hz");
-	//addAndMakeVisible(mLowPassSlider);
-	mLowPassSliderAttachment.reset(new SliderAttachment(mState, IDs::lpFreq, mLowPassSlider));
-	mLowPassSlider.setLookAndFeel(&mKnobLookAndFeel);
 
 	// LFO FREQUENCY ===========================
 	// Left ===================
@@ -390,42 +336,42 @@ void ChorusAudioProcessorEditor::initialiseGUI()
 	// TITLE LABELS =====================================
 	// FeedbackTitle
 	mFeedbackTitleLabel.setText("Feedback", dontSendNotification);
-	mFeedbackTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mFeedbackTitleLabel.setColour(Label::textColourId, labelColour);
 	mFeedbackTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mFeedbackTitleLabel.setFont(mLabelFont);
 	mFeedbackTitleLabel.setJustificationType(Justification::centredRight);
 	addAndMakeVisible(mFeedbackTitleLabel);
 	// Depth
 	mDepthTitleLabel.setText("Depth", dontSendNotification);
-	mDepthTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mDepthTitleLabel.setColour(Label::textColourId, labelColour);
 	mDepthTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mDepthTitleLabel.setFont(mLabelFont);
 	mDepthTitleLabel.setJustificationType(Justification::centredRight);
 	addAndMakeVisible(mDepthTitleLabel);
 	// Frequency
 	mFreqTitleLabel.setText("Frequency", dontSendNotification);
-	mFreqTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mFreqTitleLabel.setColour(Label::textColourId, labelColour);
 	mFreqTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mFreqTitleLabel.setFont(mLabelFont);
 	mFreqTitleLabel.setJustificationType(Justification::centredRight);
 	addAndMakeVisible(mFreqTitleLabel);
 	// Left
 	mLeftTitleLabel.setText("L", dontSendNotification);
-	mLeftTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mLeftTitleLabel.setColour(Label::textColourId, labelColour);
 	mLeftTitleLabel.setSize(mTitleWidth, mTitleHeight);
 	mLeftTitleLabel.setFont(mTitleFont);
 	mLeftTitleLabel.setJustificationType(Justification::centred);
 	addAndMakeVisible(mLeftTitleLabel);
 	// Center
 	mCenterTitleLabel.setText("C", dontSendNotification);
-	mCenterTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mCenterTitleLabel.setColour(Label::textColourId, labelColour);
 	mCenterTitleLabel.setSize(mTitleWidth, mTitleHeight);
 	mCenterTitleLabel.setFont(mTitleFont);
 	mCenterTitleLabel.setJustificationType(Justification::centred);
 	addAndMakeVisible(mCenterTitleLabel);
 	// Right
 	mRightTitleLabel.setText("R", dontSendNotification);
-	mRightTitleLabel.setColour(Label::textColourId, Colours::antiquewhite);
+	mRightTitleLabel.setColour(Label::textColourId, labelColour);
 	mRightTitleLabel.setSize(mTitleWidth, mTitleHeight);
 	mRightTitleLabel.setFont(mTitleFont);
 	mRightTitleLabel.setJustificationType(Justification::centred);

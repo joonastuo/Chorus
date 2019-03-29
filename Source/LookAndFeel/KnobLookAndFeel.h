@@ -38,7 +38,7 @@ public:
 		// Draw path of slider foreground (in white)
 		Path foregroundArc;
 		foregroundArc.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, angle, true);
-		g.setColour(Colours::antiquewhite);
+		g.setColour(Colours::antiquewhite.brighter(.4f));
 		g.strokePath(foregroundArc, PathStrokeType(3.f, PathStrokeType::curved, PathStrokeType::rounded));
 
 		// Pointer

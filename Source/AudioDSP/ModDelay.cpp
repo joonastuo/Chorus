@@ -50,16 +50,6 @@ void ModDelay::prepareGain(const int& samplesPerBlock, const float & W, const fl
 	mSmoothFB.setCurrentAndTargetValue(FB);
 }
 
-void ModDelay::prepareFilters(const int & sampleRate, const float & lpFreq, const float & hpFreq)
-{
-	IIRCoefficients hpCoeff = IIRCoefficients::makeHighPass(sampleRate, hpFreq);
-	mHighPass.setCoefficients(hpCoeff);
-	IIRCoefficients lpCoeff = IIRCoefficients::makeLowPass(sampleRate, lpFreq);
-	mLowPass.setCoefficients(lpCoeff);
-	mHighPass.reset();
-	mLowPass.reset();
-}
-
 void ModDelay::update(const float & LFOFreq, const float& LFODepth, const float & W, const float & FB, const float& lpFreq, const float& hpFreq)
 {
 	mLFO.setFreq(LFOFreq);
@@ -68,11 +58,6 @@ void ModDelay::update(const float & LFOFreq, const float& LFODepth, const float 
 	mSmoothW.setTargetValue(W);
 	mSmoothG.setCurrentAndTargetValue(G);
 	mSmoothFB.setTargetValue(FB);
-
-	IIRCoefficients hpCoeff = IIRCoefficients::makeHighPass(mSampleRate, hpFreq);
-	mHighPass.setCoefficients(hpCoeff);
-	IIRCoefficients lpCoeff = IIRCoefficients::makeLowPass(mSampleRate, lpFreq);
-	mLowPass.setCoefficients(lpCoeff);
 }
 
 void ModDelay::process(const float * input, float * output)
@@ -112,8 +97,6 @@ void ModDelay::process(const float * input, float * output)
 
 		auto inputSampleW = input[sample];
 		auto inputSampleG = input[sample];
-		inputSampleG = mLowPass.processSingleSampleRaw(inputSampleG);
-		inputSampleW = mHighPass.processSingleSampleRaw(inputSampleW);
 
 		// Add input and feedback to delayLine
 		mDelayLine.push(inputSampleW + delayedSample * FB);

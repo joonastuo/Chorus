@@ -65,16 +65,6 @@ private:
 	Slider mMixSlider;
 	std::unique_ptr<SliderAttachment> mMixSliderAttachment;
 
-	// Low pass iflter ===================
-	Label mHighPassLabel;
-	Slider mHighPassSlider;
-	std::unique_ptr<SliderAttachment> mHighPassSliderAttachment;
-	
-	// High pass filter ==================
-	Label mLowPassLabel;
-	Slider mLowPassSlider;
-	std::unique_ptr<SliderAttachment> mLowPassSliderAttachment;
-
 	// LFO frequency ======================
 	// Left
 	Slider mLfoFreqLSlider;
