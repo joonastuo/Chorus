@@ -31,39 +31,51 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 {
 	// Fill background
 	Colour bgColour = getLookAndFeel().findColour(ResizableWindow::backgroundColourId);
-    g.fillAll (bgColour);
+    g.fillAll (Colours::silver.brighter(.4f).contrasting(.2f));
 	
+	// Plugin area
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
+	// Area for title ("LCR Chorus")
 	auto titleArea = area.removeFromTop(mLabelHeight + mSliderHeight + 10.f);
 	titleArea.removeFromBottom(10.f);
 
+	// Area for the mix control
 	auto mixArea = titleArea.removeFromRight(mSliderWidth);
-	Colour boxColour = Colours::aqua.darker(.5f).contrasting(.1f);
+
+	// Fill mix area
+	Colour boxColour = Colours::aqua.darker(.5f).contrasting(.3f);
 	g.setColour(boxColour);
 	g.fillRoundedRectangle(mixArea.toFloat(), 10.f);
+	// Draw lines around mix area
 	g.setColour(bgColour.darker(0.8f));
 	g.drawRoundedRectangle(mixArea.toFloat(), 10.f, 3.f);
+	// Draw legs on mix area
 	drawLegs(g, mixArea.toFloat());
 
+	// Separate title area from mix
 	titleArea.removeFromRight(10.f);
 	titleArea.removeFromTop(45.f);
+	// Draw legs on title area
 	drawLegs(g, titleArea.toFloat());
-
+	// Fill title area and draw border
 	g.setColour(boxColour);
 	g.fillRoundedRectangle(titleArea.toFloat(), 10.f);
 	g.setColour(bgColour.darker(0.8f));
 	g.drawRoundedRectangle(titleArea.toFloat(), 10.f, 3.f);
+	// Draw lines around the title
 	drawTitleLines(g, titleArea.toFloat());
+	// Draw title text
 	g.setColour(Colours::antiquewhite);
 	g.setFont(Font("Pacifico", 50, Font::plain));
 	g.drawFittedText("LCR Chorus", titleArea, Justification::centred, 1);
-	g.setColour(bgColour.darker(0.8f));
 
+	// Fill LCR control area and border around
 	Colour LCRColour = Colours::darkblue.darker(1).contrasting(.3f);
 	g.setColour(boxColour);
 	g.fillRoundedRectangle(area.toFloat(), 10.f);
 	g.setColour(bgColour.darker(0.8f));
 	g.drawRoundedRectangle(area.toFloat(), 10.f, 3.f);
+	// Draw lines dividing controller sections
 	area.removeFromTop(mTitleHeight);
 	Line<float> myLine(area.getTopRight().toFloat(), area.getTopLeft().toFloat());
 	g.setColour(boxColour.darker(.4));
@@ -80,6 +92,7 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 	}
 }
 
+//==============================================================================
 void ChorusAudioProcessorEditor::drawTitleLines(Graphics & g, Rectangle<float> titleArea)
 {
 	auto tlTitle = titleArea.getTopLeft();
@@ -105,6 +118,7 @@ void ChorusAudioProcessorEditor::drawTitleLines(Graphics & g, Rectangle<float> t
 	g.drawLine(tlTitle.getX() + 4.f  , tlTitle.getY() + 10.f * lineNum, trTitle.getX() - 4.f, trTitle.getY() + 10.f * lineNum, 2.f);
 }
 
+//==============================================================================
 void ChorusAudioProcessorEditor::drawLegs(Graphics& g, Rectangle<float> area)
 {
 	auto areaBottomLeft  = area.getBottomLeft();
@@ -115,6 +129,7 @@ void ChorusAudioProcessorEditor::drawLegs(Graphics& g, Rectangle<float> area)
 
 }
 
+//==============================================================================
 void ChorusAudioProcessorEditor::resized()
 {
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
