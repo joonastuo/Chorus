@@ -31,6 +31,7 @@ public:
     ~LFO();
 	void prepare(const float& sampleRate, const float& maximumBlockSize);
 	float getValue();
+	float getValueAndAdvance();
 	void setFreq(const float& freq);
 	void setUnipolar(const bool& isUnipolar);
 	void setWaveform(const int& waveform);

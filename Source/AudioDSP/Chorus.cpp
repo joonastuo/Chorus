@@ -26,42 +26,48 @@ Chorus::~Chorus()
 //==============================================================================
 void Chorus::prepare(const float & sampleRate, const int & samplesPerBlock, const int & numChannels)
 {
-	float W = *mState.getRawParameterValue(IDs::wetness);
-	float FBL = *mState.getRawParameterValue(IDs::feedbackL);
-	float FBC = *mState.getRawParameterValue(IDs::feedbackC);
-	float FBR = *mState.getRawParameterValue(IDs::feedbackR);
+	// Prepare delay lines
+	float minDelay = 7.f;
+	float maxDelayDepth = 20.f;
+	int delayBufferLen = static_cast<int>(((minDelay + maxDelayDepth) / 1000.f) * sampleRate + mSamplesPerBlock);
+
+	DelayData delayDataL;
+	DelayData delayDataC;
+	DelayData delayDataR;
+	std::array<DelayData, 3> delayDataArray = { delayDataL, delayDataC, delayDataR };
+
+	float lfoFreqs [3] = { 0.f, 0.f, 0.f };
+	getLfoFreq(lfoFreqs);
+	float lfoPhases[3] = { 0.f, 0.f, 0.f };
+	getLfoPhase(lfoPhases);
+	float lfoDepths[3] = { 0.f, 0.f, 0.f };
+	getLfoDepth(lfoDepths);
+	float feedbacks[3] = { 0.f, 0.f, 0.f };
+	getFeedback(feedbacks);
+
+	for (auto i = 0; i < 3; ++i)
+	{
+		delayDataArray[i].sampleRate	  = sampleRate;
+		delayDataArray[i].samplesPerBlock = samplesPerBlock;
+		delayDataArray[i].minDelayTime	  = minDelay;
+		delayDataArray[i].maxDelayDepth   = maxDelayDepth;
+		delayDataArray[i].delayLineLen	  = delayBufferLen;
+		delayDataArray[i].wetness		  = getWetness();
+		delayDataArray[i].feedback		  = feedbacks[i];
+		delayDataArray[i].lfoFreq		  = lfoFreqs[i];
+		delayDataArray[i].lfoPhase		  = lfoPhases[i];
+		delayDataArray[i].lfoDepth		  = lfoDepths[i];
+	}
+	
+	mLeftDelay  .prepare(delayDataArray[0]);
+	mCenterDelay.prepare(delayDataArray[1]);
+	mRightDelay .prepare(delayDataArray[2]);
 
 	// Set values to member variables ===============
 	mSampleRate = sampleRate;
 	mSamplesPerBlock = samplesPerBlock;
 	mNumChannels = numChannels;
-	// Set to be maximum delay value + safety!!!
-	mDelayBufferLen = 2 * (mSampleRate + mSamplesPerBlock);
 	mCenterBuffer.setSize(1, samplesPerBlock);
-
-	mLeftDelay.prepareDelay(mDelayBufferLen);
-	mCenterDelay.prepareDelay(mDelayBufferLen);
-	mRightDelay.prepareDelay(mDelayBufferLen);
-
-	mLeftDelay.prepareGain(samplesPerBlock, W, FBL);
-	mCenterDelay.prepareGain(samplesPerBlock, W, FBC);
-	mRightDelay.prepareGain(samplesPerBlock, W, FBR);
-
-	float lfoFreqL = *mState.getRawParameterValue(IDs::lfoFreqL);
-	float lfoFreqC = *mState.getRawParameterValue(IDs::lfoFreqC);
-	float lfoFreqR = *mState.getRawParameterValue(IDs::lfoFreqR);
-
-	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
-	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
-	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
-
-	float lfoPhaseL = 90.f;
-	float lfoPhaseC = 0.f;
-	float lfoPhaseR = 270.f;
-
-	mLeftDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseL, lfoFreqL, lfoDepthL);
-	mCenterDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseC, lfoFreqC, lfoDepthC);
-	mRightDelay.prepareLFO(mSampleRate, samplesPerBlock, lfoPhaseR, lfoFreqR, lfoDepthR);
 }
 
 //==============================================================================
@@ -70,8 +76,9 @@ void Chorus::process(AudioBuffer<float>& buffer)
 	updateParameters();
 
 	// Left and right input
-	const float* leftInput = buffer.getReadPointer(0);
+	const float* leftInput  = buffer.getReadPointer(0);
 	const float* rightInput = buffer.getReadPointer(0);
+
 	if (buffer.getNumChannels() == 2)
 		rightInput = buffer.getReadPointer(1);
 	else if (buffer.getNumChannels() > 2)
@@ -95,29 +102,69 @@ void Chorus::process(AudioBuffer<float>& buffer)
 	buffer.addFrom(1, 0, centerOutput, mCenterBuffer.getNumSamples());
 }
 
+//==============================================================================
 void Chorus::updateParameters()
 {
-	float wetness = *mState.getRawParameterValue(IDs::wetness);
+	float W = getWetness();
 
-	float W = wetness / 100.f;
+	float feedback[3] = { 0.f };
+	getFeedback(feedback);
 
-	float FeedbackL = *mState.getRawParameterValue(IDs::feedbackL);
-	float FeedbackC = *mState.getRawParameterValue(IDs::feedbackC);
-	float FeedbackR = *mState.getRawParameterValue(IDs::feedbackR);
+	float lfoFreq[3] = { 0.f };
+	getLfoFreq(lfoFreq);
 
-	float FBL = FeedbackL / 100.f;
-	float FBC = FeedbackC / 100.f;
-	float FBR = FeedbackR / 100.f;
+	float lfoDepth[3] = { 0.f };
+	getLfoDepth(lfoDepth);
 
-	float lfoFreqL = *mState.getRawParameterValue(IDs::lfoFreqL);
-	float lfoFreqC = *mState.getRawParameterValue(IDs::lfoFreqC);
-	float lfoFreqR = *mState.getRawParameterValue(IDs::lfoFreqR);
-
-	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
-	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
-	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
-
-	mLeftDelay.update(lfoFreqL, lfoDepthL, W, FBL);
-	mCenterDelay.update(lfoFreqC, lfoDepthC, W, FBC);
-	mRightDelay.update(lfoFreqR, lfoDepthR, W, FBR);
+	mLeftDelay  .update(lfoFreq[0], lfoDepth[0], W, feedback[0]);
+	mCenterDelay.update(lfoFreq[1], lfoDepth[1], W, feedback[1]);
+	mRightDelay .update(lfoFreq[2], lfoDepth[2], W, feedback[2]);
 }
+
+//==============================================================================
+float Chorus::getWetness()
+{
+	float W   = *mState.getRawParameterValue(IDs::wetness);
+	return W / 100.f;
+}
+
+//==============================================================================
+void Chorus::getFeedback(float * feedback)
+{
+	float FBL = *mState.getRawParameterValue(IDs::feedbackL);
+	float FBC = *mState.getRawParameterValue(IDs::feedbackC);
+	float FBR = *mState.getRawParameterValue(IDs::feedbackR);
+
+	feedback[0] = FBL / 100.f;
+	feedback[1] = FBC / 100.f;
+	feedback[2] = FBR / 100.f;
+}
+
+//==============================================================================
+void Chorus::getLfoFreq(float * lfoFreq)
+{
+	float lfoPercentageL = *mState.getRawParameterValue(IDs::lfoFreqL);
+	float lfoPercentageC = *mState.getRawParameterValue(IDs::lfoFreqC);
+	float lfoPercentageR = *mState.getRawParameterValue(IDs::lfoFreqR);
+
+	lfoFreq[0] = 0.02 * exp(lfoPercentageL * 0.05521f);
+	lfoFreq[1] = 0.02 * exp(lfoPercentageC * 0.05521f);
+	lfoFreq[2] = 0.02 * exp(lfoPercentageR * 0.05521f);
+}
+
+//==============================================================================
+void Chorus::getLfoPhase(float * lfoPhase)
+{
+	lfoPhase[0] = 90.f;
+	lfoPhase[1] = 0.f;
+	lfoPhase[2] = 270.f;
+}
+
+//==============================================================================
+void Chorus::getLfoDepth(float * lfoDepth)
+{
+	lfoDepth[0] = *mState.getRawParameterValue(IDs::lfoDepthL);
+	lfoDepth[1] = *mState.getRawParameterValue(IDs::lfoDepthC);
+	lfoDepth[2] = *mState.getRawParameterValue(IDs::lfoDepthR);
+}
+

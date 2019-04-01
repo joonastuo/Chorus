@@ -15,19 +15,34 @@
 #include "LFO.h"
 #include "../Helper/Identifiers.h"
 
+//==============================================================================
+struct DelayData
+{
+	float sampleRate = 44100.f;
+	float samplesPerBlock = 512.f;
+	float lfoFreq = 0.f;
+	float lfoPhase = 0.f;
+	float lfoDepth = 0.f;
+	float wetness = 0.f;
+	float feedback = 0.f;
+	float minDelayTime = 0.f;
+	float maxDelayDepth = 0.f;
+	int   delayLineLen = 0.f;
+};
+
+//==============================================================================
 class ModDelay
 {
 public:
 	ModDelay();
 	~ModDelay();
-	void prepareDelay(const int& delayLineSize);
-	void prepareLFO(const float& sampleRate, const float& samplesPerBlock, const float& phase, const float& freq, const float& depth);
-	void prepareGain(const int& samplesPerBlock, const float& W, const float& FB);
+	void prepare(DelayData data);
 	void update(const float& LFOFreq, const float& LFODepth, const float& W, const float& FB);
 	void process(const float* input, float* output);
 
 private:
 	float linearInterp(const float& y0, const float& yp1, const float& frac);
+
 	DelayLine<float> mDelayLine;
 	LFO mLFO;
 	SmoothedValue<float> mSmoothG;
@@ -36,5 +51,7 @@ private:
 
 	float mSampleRate = 44100.f;
 	int mSamplesPerBlock = 512;
-	float mDelayTime = 7.f;
+
+	float mMinDelayTime = 7.f;
+	float mMaxDelayDepth = 20.f;
 };

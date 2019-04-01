@@ -29,6 +29,12 @@ public:
 	void updateParameters();
 
 private:
+	float getWetness();
+	void getFeedback(float* feedback);
+	void getLfoFreq(float* lfoFreq);
+	void getLfoPhase(float* lfoPhase);
+	void getLfoDepth(float* lfoDepth);
+
     //==============================================================================
 	// Private member variables
 	AudioProcessorValueTreeState& mState;
