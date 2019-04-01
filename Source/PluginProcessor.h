@@ -11,6 +11,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Helper/Identifiers.h"
+#include "AudioDSP/Chorus.h"
 
 //==============================================================================
 /**
@@ -54,8 +56,12 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+	AudioProcessorValueTreeState& getState();
 
 private:
+	AudioProcessorValueTreeState mState;
+	Chorus mChorus;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusAudioProcessor)
 };

@@ -95,10 +95,10 @@ LFO::~LFO()
 	// Empty destructor
 }
 
-void LFO::prepare(dsp::ProcessSpec spec)
+void LFO::prepare(const float& sampleRate, const float& maximumBlockSize)
 {
-	mSampleRate = spec.sampleRate;
-	mSamplesPerBlock = spec.maximumBlockSize;
+	mSampleRate		 = sampleRate;
+	mSamplesPerBlock = maximumBlockSize;
 }
 
 float LFO::getValue()
@@ -131,6 +131,8 @@ float LFO::getValue()
 		break;
 	}
 
+	LFOVal *= mDepth;
+
 	if (mUnipolar)
 	{
 		LFOVal /= 2;
@@ -141,6 +143,13 @@ float LFO::getValue()
 	}
 
 	return LFOVal;
+}
+
+float LFO::getValueAndAdvance()
+{
+	float value = getValue();
+	advanceSamples(1);
+	return value;
 }
 
 void LFO::setFreq(const float & freq)
@@ -182,3 +191,7 @@ void LFO::setPhase(const float & phase)
 	mPhase = phase;
 }
 
+void LFO::setDepth(const float & depth)
+{
+	mDepth = depth / 100.f;
+}

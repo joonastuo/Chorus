@@ -15,13 +15,23 @@
 //==============================================================================
 /*
 */
+
+enum Waveforms
+{
+	sine,	// 0
+	saw,	// 1
+	tri,	// 2
+	square	// 3
+};
+
 class LFO
 {
 public:
     LFO();
     ~LFO();
-	void prepare(dsp::ProcessSpec spec);
+	void prepare(const float& sampleRate, const float& maximumBlockSize);
 	float getValue();
+	float getValueAndAdvance();
 	void setFreq(const float& freq);
 	void setUnipolar(const bool& isUnipolar);
 	void setWaveform(const int& waveform);
@@ -29,14 +39,8 @@ public:
 	void advanceBlock();
 	float linearInterp(const float& y0, const float& yp1, const float& frac);
 	void setPhase(const float& phase);
+	void setDepth(const float& depth);
 
-	enum Waveforms
-	{
-		sine,	// 0
-		saw,	// 1
-		tri,	// 2
-		square	// 3
-	};
 
 private:
 	float mReadIndex = 0.f;
@@ -44,6 +48,7 @@ private:
 	int mWaveform	 = 0;
 	float mInc		 = 0.f;
 	bool mUnipolar   = true;
+	float mDepth	 = 1.f;
 
 	float mSampleRate	   = 44100.f;
 	float mSamplesPerBlock = 512.f;
