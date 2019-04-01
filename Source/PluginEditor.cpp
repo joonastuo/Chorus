@@ -15,7 +15,7 @@
 ChorusAudioProcessorEditor::ChorusAudioProcessorEditor (ChorusAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p), mState(p.getState())
 {
-	int windowWidth = 2 * mWindowMarginWidth + 4 * jmax(mSliderWidth, mLabelWidht);
+	int windowWidth  = 2 * mWindowMarginWidth  + 4 * jmax(mSliderWidth, mLabelWidht);
 	int windowHeight = 2 * mWindowMarginHeight + 3 * mSliderHeight + mTitleHeight + mTitleHeight + mSliderHeight;
     setSize (windowWidth, windowHeight);
 	initialiseGUI();
