@@ -116,4 +116,8 @@ void Chorus::updateParameters()
 	float lfoDepthL = *mState.getRawParameterValue(IDs::lfoDepthL);
 	float lfoDepthC = *mState.getRawParameterValue(IDs::lfoDepthC);
 	float lfoDepthR = *mState.getRawParameterValue(IDs::lfoDepthR);
+
+	mLeftDelay.update(lfoFreqL, lfoDepthL, W, FBL);
+	mCenterDelay.update(lfoFreqC, lfoDepthC, W, FBC);
+	mRightDelay.update(lfoFreqR, lfoDepthR, W, FBR);
 }

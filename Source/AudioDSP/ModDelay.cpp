@@ -50,7 +50,7 @@ void ModDelay::prepareGain(const int& samplesPerBlock, const float & W, const fl
 	mSmoothFB.setCurrentAndTargetValue(FB);
 }
 
-void ModDelay::update(const float & LFOFreq, const float& LFODepth, const float & W, const float & FB, const float& lpFreq, const float& hpFreq)
+void ModDelay::update(const float & LFOFreq, const float& LFODepth, const float & W, const float & FB)
 {
 	mLFO.setFreq(LFOFreq);
 	mLFO.setDepth(LFODepth);
@@ -95,14 +95,13 @@ void ModDelay::process(const float * input, float * output)
 			delayedSample = mDelayLine.get(delayInSamplesInt);
 		}
 
-		auto inputSampleW = input[sample];
-		auto inputSampleG = input[sample];
+		auto inputSample = input[sample];
 
 		// Add input and feedback to delayLine
-		mDelayLine.push(inputSampleW + delayedSample * FB);
+		mDelayLine.push(inputSample + delayedSample * FB);
 
 		// Mix dry and wet input
-		output[sample] = inputSampleG * G + delayedSample * W;
+		output[sample] = inputSample * G + delayedSample * W;
 	}
 }
 

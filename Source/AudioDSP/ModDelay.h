@@ -23,7 +23,7 @@ public:
 	void prepareDelay(const int& delayLineSize);
 	void prepareLFO(const float& sampleRate, const float& samplesPerBlock, const float& phase, const float& freq, const float& depth);
 	void prepareGain(const int& samplesPerBlock, const float& W, const float& FB);
-	void update(const float& LFOFreq, const float& LFODepth, const float& W, const float& FB, const float& lpFreq, const float& hpFreq);
+	void update(const float& LFOFreq, const float& LFODepth, const float& W, const float& FB);
 	void process(const float* input, float* output);
 
 private:
