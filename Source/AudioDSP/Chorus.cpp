@@ -100,6 +100,8 @@ void Chorus::process(AudioBuffer<float>& buffer)
 
 	buffer.addFrom(0, 0, centerOutput, mCenterBuffer.getNumSamples());
 	buffer.addFrom(1, 0, centerOutput, mCenterBuffer.getNumSamples());
+	float volume = getVolume();
+	buffer.applyGain(volume);
 }
 
 //==============================================================================
@@ -124,20 +126,15 @@ void Chorus::updateParameters()
 //==============================================================================
 float Chorus::getWetness()
 {
-	float W   = *mState.getRawParameterValue(IDs::wetness);
-	return W / 100.f;
+	return  *mState.getRawParameterValue(IDs::wetness);
 }
 
 //==============================================================================
 void Chorus::getFeedback(float * feedback)
 {
-	float FBL = *mState.getRawParameterValue(IDs::feedbackL);
-	float FBC = *mState.getRawParameterValue(IDs::feedbackC);
-	float FBR = *mState.getRawParameterValue(IDs::feedbackR);
-
-	feedback[0] = FBL / 100.f;
-	feedback[1] = FBC / 100.f;
-	feedback[2] = FBR / 100.f;
+	feedback[0] = *mState.getRawParameterValue(IDs::feedbackL);
+	feedback[1] = *mState.getRawParameterValue(IDs::feedbackC);
+	feedback[2] = *mState.getRawParameterValue(IDs::feedbackR);
 }
 
 //==============================================================================
@@ -166,5 +163,11 @@ void Chorus::getLfoDepth(float * lfoDepth)
 	lfoDepth[0] = *mState.getRawParameterValue(IDs::lfoDepthL);
 	lfoDepth[1] = *mState.getRawParameterValue(IDs::lfoDepthC);
 	lfoDepth[2] = *mState.getRawParameterValue(IDs::lfoDepthR);
+}
+
+float Chorus::getVolume()
+{
+	float volumedB = *mState.getRawParameterValue(IDs::volume);
+	return pow(10, volumedB / 20.f);
 }
 

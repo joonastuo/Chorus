@@ -15,8 +15,8 @@
 ChorusAudioProcessorEditor::ChorusAudioProcessorEditor (ChorusAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p), mState(p.getState())
 {
-	int windowWidth  = 2 * mWindowMarginWidth  + 4 * jmax(mSliderWidth, mLabelWidht);
-	int windowHeight = 2 * mWindowMarginHeight + 3 * mSliderHeight + mTitleHeight + mTitleHeight + mSliderHeight;
+	int windowWidth  = 2 * mWindowMarginWidth  + 3 * mSliderWidth + 2 * mLabelWidht + 10.f;
+	int windowHeight = 2 * mWindowMarginHeight + 3 * mSliderHeight + mTitleHeight;
     setSize (windowWidth, windowHeight);
 	initialiseGUI();
 	mFlexArea = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
@@ -24,6 +24,7 @@ ChorusAudioProcessorEditor::ChorusAudioProcessorEditor (ChorusAudioProcessor& p)
 
 ChorusAudioProcessorEditor::~ChorusAudioProcessorEditor()
 {
+	// Empty destructor
 }
 
 //==============================================================================
@@ -31,110 +32,49 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 {
 	// Fill background
 	Colour bgColour = getLookAndFeel().findColour(ResizableWindow::backgroundColourId);
-    g.fillAll (bgColour.brighter(.1f));
-	
-	// Plugin area
+    g.fillAll (bgColour);
+	// Draw lines to separate sections
+	g.setColour(bgColour.darker(.5));
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
-	// Area for title ("LCR Chorus")
-	auto titleArea = area.removeFromTop(mLabelHeight + mSliderHeight + 10.f);
-	titleArea.removeFromBottom(10.f);
+	auto mixVolumeArea = area.removeFromLeft(mLabelWidht + 5.f);
 
-	// Area for the mix control
-	auto mixArea = titleArea.removeFromRight(mSliderWidth);
+	// Draw line between mix/volume and other controls
+	g.drawLine(Line<float>(mixVolumeArea.getTopRight().toFloat(), mixVolumeArea.getBottomRight().toFloat()), 3.f);
+	area.removeFromLeft(5.f);
 
-	// Fill mix area
-	Colour boxColour = Colours::aqua.darker(.5f).contrasting(.3f);
-	g.setColour(boxColour);
-	g.fillRoundedRectangle(mixArea.toFloat(), 10.f);
-	// Draw lines around mix area
-	g.setColour(bgColour.darker(0.8f));
-	g.drawRoundedRectangle(mixArea.toFloat(), 10.f, 3.f);
-	// Draw legs on mix area
-	drawLegs(g, mixArea.toFloat());
+	// Draw lines between labels (feedback, frequency, depth)
+	auto labelArea = area.removeFromLeft(mLabelWidht);
+	g.setColour(bgColour.darker(.5));
+	labelArea.removeFromLeft(4.f);
+	labelArea.removeFromRight(8.f);
+	labelArea.removeFromTop(mTitleHeight + 3.f);
+	g.drawLine(Line<float>(labelArea.getTopLeft().toFloat(), labelArea.getTopRight().toFloat()), 1.f);
+	labelArea.removeFromTop(mSliderHeight);
+	g.drawLine(Line<float>(labelArea.getTopLeft().toFloat(), labelArea.getTopRight().toFloat()), 1.f);
+	labelArea.removeFromTop(mSliderHeight);
+	g.drawLine(Line<float>(labelArea.getTopLeft().toFloat(), labelArea.getTopRight().toFloat()), 1.f);
 
-	// Separate title area from mix
-	titleArea.removeFromRight(10.f);
-	titleArea.removeFromTop(45.f);
-	// Draw legs on title area
-	drawLegs(g, titleArea.toFloat());
-	// Fill title area and draw border
-	g.setColour(boxColour);
-	g.fillRoundedRectangle(titleArea.toFloat(), 10.f);
-	g.setColour(bgColour.darker(0.8f));
-	g.drawRoundedRectangle(titleArea.toFloat(), 10.f, 3.f);
-	// Draw lines around the title
-	drawTitleLines(g, titleArea.toFloat());
-	// Draw title text
-	g.setColour(Colours::antiquewhite.brighter(.4f));
-	g.setFont(Font("Pacifico", 50, Font::plain));
-	g.drawFittedText("LCR Chorus", titleArea, Justification::centred, 1);
-
-	// Fill LCR control area and border around
-	Colour LCRColour = Colours::darkblue.darker(1).contrasting(.3f);
-	g.setColour(boxColour);
-	g.fillRoundedRectangle(area.toFloat(), 10.f);
-	g.setColour(bgColour.darker(0.8f));
-	g.drawRoundedRectangle(area.toFloat(), 10.f, 3.f);
-	// Draw lines dividing controller sections
-	area.removeFromTop(mTitleHeight);
-	Line<float> myLine(area.getTopRight().toFloat(), area.getTopLeft().toFloat());
-	g.setColour(boxColour.darker(.4));
-	myLine = myLine.withShortenedEnd(4.f);
-	myLine = myLine.withShortenedStart(4.f);
-	g.drawLine(myLine, 3.f);
+	// Divide LCR controls
+	g.setColour(bgColour.darker(.5));
+	auto topLeft = area.getTopLeft();
+	auto topRight = area.getTopRight();
+	auto bottomLeft = area.getBottomLeft();
+	area.removeFromTop(mTitleHeight + 3.f);
+	g.drawLine(topLeft.getX(), topLeft.getY(), bottomLeft.getX(), bottomLeft.getY(), 3.f);
+	g.drawLine(area.getTopLeft().getX(), area.getTopLeft().getY(), area.getTopRight().getX(), area.getTopRight().getY(), 3.f);
 	for (auto i = 0; i < 2; ++i)
 	{
 		area.removeFromTop(mSliderHeight);
-		myLine = Line<float>(area.getTopRight().toFloat(), area.getTopLeft().toFloat());
-		myLine = myLine.withShortenedEnd(4.f);
-		myLine = myLine.withShortenedStart(4.f);
-		g.drawLine(myLine, 3.f);
+		g.drawLine(area.getTopLeft().getX(), area.getTopLeft().getY(), area.getTopRight().getX(), area.getTopRight().getY(), 3.f);
 	}
-}
-
-//==============================================================================
-void ChorusAudioProcessorEditor::drawTitleLines(Graphics & g, Rectangle<float> titleArea)
-{
-	auto tlTitle = titleArea.getTopLeft();
-	auto trTitle = titleArea.getTopRight();
-	g.setColour(Colours::antiquewhite);
-	// First
-	g.drawLine(tlTitle.getX() + 4.f, tlTitle.getY() + 10.f, trTitle.getX() - 4.f, trTitle.getY() + 10.f, 2.f);
-	// Second
-	float lineNum = 2;
-	g.drawLine(tlTitle.getX() + 4.f  , tlTitle.getY() + 10.f * lineNum, tlTitle.getX()  + 40.f, trTitle.getY() + 10.f * lineNum, 2.f);
-	g.drawLine(tlTitle.getX() + 102.f, tlTitle.getY() + 10.f * lineNum, tlTitle.getX() + 111.f, trTitle.getY() + 10.f * lineNum, 2.f);
-	g.drawLine(tlTitle.getX() + 145.f, tlTitle.getY() + 10.f * lineNum, trTitle.getX() - 4.f  , trTitle.getY() + 10.f * lineNum, 2.f);
-	// Third
-	lineNum = 3;
-	g.drawLine(tlTitle.getX() + 4.f  , tlTitle.getY() + 10.f * lineNum, tlTitle.getX()  + 36.f, trTitle.getY() + 10.f * lineNum, 2.f);
-	g.drawLine(tlTitle.getX() + 194.f, tlTitle.getY() + 10.f * lineNum, trTitle.getX()  - 4.f , trTitle.getY() + 10.f * lineNum, 2.f);
-	// Fourth
-	lineNum = 4;
-	g.drawLine(tlTitle.getX() + 4.f  , tlTitle.getY() + 10.f * lineNum, tlTitle.getX() + 32.f, trTitle.getY() + 10.f * lineNum, 2.f);
-	g.drawLine(tlTitle.getX() + 200.f, tlTitle.getY() + 10.f * lineNum, trTitle.getX() - 4.f , trTitle.getY() + 10.f * lineNum, 2.f);
-	// Fifth
-	lineNum = 5;
-	g.drawLine(tlTitle.getX() + 4.f  , tlTitle.getY() + 10.f * lineNum, trTitle.getX() - 4.f, trTitle.getY() + 10.f * lineNum, 2.f);
-}
-
-//==============================================================================
-void ChorusAudioProcessorEditor::drawLegs(Graphics& g, Rectangle<float> area)
-{
-	auto areaBottomLeft  = area.getBottomLeft();
-	auto areaBottomRight = area.getBottomRight();
-	auto distance = area.getWidth() * 0.15f;
-	g.drawLine(areaBottomLeft.getX()  + distance, areaBottomLeft.getY(), areaBottomLeft.getX()  + distance, areaBottomLeft.getY() + 10.f, 10.f);
-	g.drawLine(areaBottomRight.getX() - distance, areaBottomLeft.getY(), areaBottomRight.getX() - distance, areaBottomLeft.getY() + 10.f, 10.f);
-
 }
 
 //==============================================================================
 void ChorusAudioProcessorEditor::resized()
 {
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
-	auto controlArea = area.removeFromTop(mLabelHeight + mSliderHeight + 10.f);
-	controlArea.removeFromBottom(10.f);
+	auto mixArea = area.removeFromLeft(jmax(mLabelWidht, mSliderWidth));
+	area.removeFromLeft(10.f);
 
 	// Mix ===============================
 	FlexBox mixBox;
@@ -147,8 +87,21 @@ void ChorusAudioProcessorEditor::resized()
 			FlexItem(mMixSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
 		});
 
-	auto mixArea = controlArea.removeFromRight(mSliderWidth);
+	auto gainArea = mixArea.removeFromBottom(mixArea.getHeight() / 2.f);
 	mixBox.performLayout(mixArea.toFloat());
+
+
+	FlexBox gainBox;
+	gainBox.alignContent = FlexBox::AlignContent::center;
+	gainBox.justifyContent = FlexBox::JustifyContent::center;
+	gainBox.flexDirection = FlexBox::Direction::column;
+	gainBox.items.addArray(
+		{
+			FlexItem(mVolumeLabel) .withWidth(mLabelWidht) .withHeight(mLabelHeight),
+			FlexItem(mVolumeSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+		});
+
+	gainBox.performLayout(gainArea.toFloat());
 
 	//LCR box
 	FlexBox LCRBox;
@@ -174,8 +127,8 @@ void ChorusAudioProcessorEditor::resized()
 	titleBox.items.addArray(
 		{
 			FlexItem(mFreqTitleLabel)    .withWidth(mLabelWidht).withHeight(mSliderHeight),
-			FlexItem(mDepthTitleLabel)   .withWidth(mLabelWidht).withHeight(mSliderHeight),
-			FlexItem(mFeedbackTitleLabel).withWidth(mLabelWidht).withHeight(mSliderHeight)
+			FlexItem(mFeedbackTitleLabel).withWidth(mLabelWidht).withHeight(mSliderHeight),
+			FlexItem(mDepthTitleLabel)   .withWidth(mLabelWidht).withHeight(mSliderHeight)
 		});
 	auto titleArea = area.removeFromLeft(mLabelWidht);
 	titleBox.performLayout(titleArea.toFloat());
@@ -188,8 +141,8 @@ void ChorusAudioProcessorEditor::resized()
 	leftBox.items.addArray(
 		{
 			FlexItem(mLfoFreqLSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			FlexItem(mFeedbackLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
+			FlexItem(mLfoDepthLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
 		});
 
 	auto leftArea = area.removeFromLeft(mSliderWidth);
@@ -203,8 +156,8 @@ void ChorusAudioProcessorEditor::resized()
 	centerBox.items.addArray(
 		{
 			FlexItem(mLfoFreqCSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			FlexItem(mFeedbackCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
+			FlexItem(mLfoDepthCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
 		});
 	auto centerArea = area.removeFromLeft(mSliderWidth);
 	centerBox.performLayout(centerArea.toFloat());
@@ -217,8 +170,8 @@ void ChorusAudioProcessorEditor::resized()
 	rightBox.items.addArray(
 		{
 			FlexItem(mLfoFreqRSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			FlexItem(mFeedbackRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
+			FlexItem(mLfoDepthRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
 		});
 	auto rightArea = area.removeFromLeft(mSliderWidth);
 	rightBox.performLayout(rightArea.toFloat());
@@ -227,7 +180,25 @@ void ChorusAudioProcessorEditor::resized()
 //==============================================================================
 void ChorusAudioProcessorEditor::initialiseGUI()
 {
-	Colour labelColour = Colours::antiquewhite.brighter(.4f);
+	Colour labelColour = Colours::white;
+
+	// GAIN ====================================
+	// Label
+	mVolumeLabel.setText("Volume", dontSendNotification);
+	mVolumeLabel.setColour(Label::textColourId, labelColour);
+	mVolumeLabel.setSize(mLabelWidht, mLabelHeight);
+	mVolumeLabel.setFont(mLabelFont);
+	mVolumeLabel.setJustificationType(Justification::centred);
+	addAndMakeVisible(mVolumeLabel);
+	// Slider
+	mVolumeSlider.setSliderStyle(mSliderStyle);
+	mVolumeSlider.setSize(mSliderWidth, mSliderHeight);
+	mVolumeSlider.setTextBoxStyle(Slider::TextBoxBelow, false, mTextBoxWidth, mTextBoxHeight);
+	mVolumeSlider.setTextValueSuffix(" dB");
+	addAndMakeVisible(mVolumeSlider);
+	mVolumeSliderAttachment.reset(new SliderAttachment(mState, IDs::volume, mVolumeSlider));
+	mVolumeSlider.setLookAndFeel(&mKnobLookAndFeel);
+
 	// MIX =====================================
 	// Label
 	mMixLabel.setText("Mix", dontSendNotification);
@@ -339,21 +310,21 @@ void ChorusAudioProcessorEditor::initialiseGUI()
 	mFeedbackTitleLabel.setColour(Label::textColourId, labelColour);
 	mFeedbackTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mFeedbackTitleLabel.setFont(mLabelFont);
-	mFeedbackTitleLabel.setJustificationType(Justification::centredRight);
+	mFeedbackTitleLabel.setJustificationType(Justification::centred);
 	addAndMakeVisible(mFeedbackTitleLabel);
 	// Depth
 	mDepthTitleLabel.setText("Depth", dontSendNotification);
 	mDepthTitleLabel.setColour(Label::textColourId, labelColour);
 	mDepthTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mDepthTitleLabel.setFont(mLabelFont);
-	mDepthTitleLabel.setJustificationType(Justification::centredRight);
+	mDepthTitleLabel.setJustificationType(Justification::centred);
 	addAndMakeVisible(mDepthTitleLabel);
 	// Frequency
 	mFreqTitleLabel.setText("Frequency", dontSendNotification);
 	mFreqTitleLabel.setColour(Label::textColourId, labelColour);
 	mFreqTitleLabel.setSize(mLabelWidht, mSliderHeight);
 	mFreqTitleLabel.setFont(mLabelFont);
-	mFreqTitleLabel.setJustificationType(Justification::centredRight);
+	mFreqTitleLabel.setJustificationType(Justification::centred);
 	addAndMakeVisible(mFreqTitleLabel);
 	// Left
 	mLeftTitleLabel.setText("L", dontSendNotification);
