@@ -25,8 +25,6 @@ public:
 
     //==============================================================================
     void paint (Graphics&) override;
-	void drawTitleLines(Graphics& g, Rectangle<float> area);
-	void drawLegs(Graphics& g, Rectangle<float> area);
     void resized() override;
 
 private:
@@ -39,26 +37,30 @@ private:
 
 	// Look and feel =====================
 	// Component sizes
-	const int mSliderWidth = 80;
-	const int mSliderHeight = 80;
+	const int mSliderWidth = 70;
+	const int mSliderHeight = 70;
 	const int mTextBoxWidth = mSliderWidth;
-	const int mTextBoxHeight = 22;
-	const int mLabelHeight = 26;
-	const int mLabelWidht = mSliderWidth;
-	const int mTitleHeight = 40;
+	const int mTextBoxHeight = 14;
+	const int mLabelHeight = 16;
+	const int mLabelWidht = 80;
+	const int mTitleHeight = 25;
 	const int mTitleWidth = mSliderWidth;
 	const int mWindowMarginWidth = 10;
 	const int mWindowMarginHeight = 10;
 	const int mSpaceBetweenW = 100;
 	const int mSpaceBetweenH = 100;
 	// Label font
-	Font mLabelFont = Font("Pacifico", mLabelHeight, Font::plain);
-	Font mTitleFont = Font("Pacifico", mTitleHeight, Font::bold);
+	Font mLabelFont = Font(mLabelHeight, Font::plain);
+	Font mTitleFont = Font(mTitleHeight, Font::bold);
 	Slider::SliderStyle mSliderStyle = Slider::SliderStyle::Rotary;
 	Rectangle<int> mFlexArea;
 	KnobLookAndFeel mKnobLookAndFeel;
 
 	typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
+	Label mVolumeLabel;
+	Slider mVolumeSlider;
+	std::unique_ptr<SliderAttachment> mVolumeSliderAttachment;
 
 	// Mix ===============================
 	Label mMixLabel;

@@ -34,6 +34,7 @@ private:
 	void getLfoFreq(float* lfoFreq);
 	void getLfoPhase(float* lfoPhase);
 	void getLfoDepth(float* lfoDepth);
+	float getVolume();
 
     //==============================================================================
 	// Private member variables

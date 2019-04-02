@@ -25,8 +25,7 @@ namespace IDs {
 	DECLARE_ID(lfoDepthC)
 	DECLARE_ID(lfoDepthR)
 	DECLARE_ID(onOff)		// effect on / off
-	DECLARE_ID(hpFreq)
-	DECLARE_ID(lpFreq)
+	DECLARE_ID(volume)
 
 	#undef DECLARE_ID
 }

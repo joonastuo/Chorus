@@ -38,7 +38,7 @@ public:
 		// Draw path of slider foreground (in white)
 		Path foregroundArc;
 		foregroundArc.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, angle, true);
-		g.setColour(Colours::antiquewhite.brighter(.4f));
+		g.setColour(Colours::white);
 		g.strokePath(foregroundArc, PathStrokeType(3.f, PathStrokeType::curved, PathStrokeType::rounded));
 
 		// Pointer
@@ -53,12 +53,12 @@ public:
 	// Slider textbox
 	void drawLabel(Graphics& g, Label& label) override
 	{
-		g.setColour(Colours::antiquewhite);
+		g.setColour(Colours::white);
 
 		String text = label.getText();
 		int width = label.getWidth();
 		int height = label.getHeight();
-		g.setFont(Font("Pacifico", height, Font::plain));
+		g.setFont(Font(height - 2, Font::plain));
 		g.drawFittedText(text, 0, 0, width, height, Justification::centred, 1);
 	}
 };
