@@ -29,6 +29,8 @@ public:
 
 private:
     //==============================================================================
+	FlexItem createItem(Component& c, const int& width, const int& height);
+	FlexItem createItem(FlexBox& fb, const int& width, const int& height);
 	void initialiseGUI();
 
     //==============================================================================
@@ -50,8 +52,8 @@ private:
 	const int mSpaceBetweenW = 100;
 	const int mSpaceBetweenH = 100;
 	// Label font
-	Font mLabelFont = Font(mLabelHeight, Font::plain);
-	Font mTitleFont = Font(mTitleHeight, Font::bold);
+	Font mLabelFont = Font(static_cast<float>(mLabelHeight), Font::plain);
+	Font mTitleFont = Font(static_cast<float>(mTitleHeight), Font::bold);
 	Slider::SliderStyle mSliderStyle = Slider::SliderStyle::Rotary;
 	Rectangle<int> mFlexArea;
 	KnobLookAndFeel mKnobLookAndFeel;

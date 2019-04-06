@@ -16,62 +16,43 @@
 //==============================================================================
 LFO::LFO()
 {
-	// Triangle wave
-	// Functions calculated from coefficients m and b
-	// y = mx + b
-	// Rising edge 1
-	float mt1 = 1.f / 256.f;
-	float bt1 = 0.f;
-
-	// Rising edge 2
-	float mt2 =  1.f / 256.f;
-	float bt2 = -1.f;
-
-	// Falling edge
-	float mtf2 = -2.f / 512.f;
-	float btf2  = 1.f;
-
-	// Sawtooth
-	// Rising edge 1
-	float ms1 = 1.f / 512.f;
-	float bs1 = 0.f;
-
-	// Risign edge 2
-	float ms2 =  1.f / 512.f;
-	float bs2 = -1.f;
 
 	for (auto i = 0; i < 1024; ++i)
 	{
 		// Sin
-		mSinArray[i] = sin((static_cast<float> (i) / 1024.f) * (2 * M_PI));
+		mSinArray[i] = static_cast<float>(sin((static_cast<double> (i) / 1024.f) * (2.0 * M_PI)));
 
-		// Triangle
-		if (i < 256)
-			mTriangleArray[i] = mt1 * i + bt1;
-		else if (i >= 256 && i < 768)
-			mTriangleArray[i] = mtf2 * (i - 256) + btf2;
-		else
-			mTriangleArray[i] = mt2 * (i - 768) + bt2;
-
-		// Sawtooth
+		// Lowpass filtered versions of waves
 		mSquareArray[i] = 0.f;
 		mSawtoothArray[i] = 0.f;
+		mTriangleArray[i] = 0.f;
 
-		for (int g = 1; g <= 30; ++g)
+		// Triangle
+		for (int g = 0; g <= 15; ++g)
 		{
-			float n = static_cast<float> (g);
-			mSawtoothArray[i] += pow(-1.f, static_cast<float>(g + 1)) * (1.f / n) * sin(2.f * M_PI * i * n / 1024.f);
+			double n = static_cast<double>(g);
+			mTriangleArray[i] += static_cast<float>(pow(-1.0, n) * (1.0 / pow((2.0 * n + 1.0), 2)) 
+								* sin(2.0 * M_PI * (2.0 * n + 1.0) * i / 1024.0));
 		}
 
+		// Sawtooth
+		for (int g = 1; g <= 30; ++g)
+		{
+			double n = static_cast<double> (g);
+			mSawtoothArray[i] += static_cast<float>(pow(-1.0, static_cast<double>(g + 1)) * (1.0 / n) * sin(2.0 * M_PI * i * n / 1024.0));
+		}
+
+		// Square
 		for (int g = 1; g <= 29; g+=2)
 		{
-			float n = static_cast<float> (g);
-			mSquareArray[i] += (1.f / n) * sin(2.f * M_PI * i * n / 1024.f);
+			double n = static_cast<double> (g);
+			mSquareArray[i] += static_cast<float>((1.0 / n) * sin(2.0 * M_PI * i * n / 1024.0));
 		}
 		if (i == 0)
 		{
 			mMaxSqr = mSquareArray[i];
 			mMaxSaw = mSawtoothArray[i];
+			mMaxTri = mTriangleArray[i];
 		}
 		else
 		{
@@ -80,6 +61,9 @@ LFO::LFO()
 
 			if (mSawtoothArray[i] > mMaxSaw)
 				mMaxSaw = mSawtoothArray[i];
+
+			if (mTriangleArray[i] > mMaxTri)
+				mMaxTri = mTriangleArray[i];
 		}
 
 	}
@@ -87,6 +71,7 @@ LFO::LFO()
 	{
 		mSquareArray[i] /= mMaxSqr;
 		mSawtoothArray[i] /= mMaxSaw;
+		mTriangleArray[i] /= mMaxTri;
 	}
 }
 
@@ -108,7 +93,7 @@ float LFO::getValue()
 		readIndex = readIndex - 1024.f;
 
 	float LFOVal = 0.f;
-	int readIndexInt = floor(readIndex);
+	int readIndexInt = static_cast<int>(readIndex);
 	float frac = readIndex - readIndexInt;
 	int readIndexNext = readIndexInt + 1 > 1023 ? 0 : readIndexInt + 1;
 

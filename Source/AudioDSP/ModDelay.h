@@ -19,7 +19,7 @@
 struct DelayData
 {
 	float sampleRate = 44100.f;
-	float samplesPerBlock = 512.f;
+	int samplesPerBlock = 512;
 	float lfoFreq = 0.f;
 	float lfoPhase = 0.f;
 	float lfoDepth = 0.f;
@@ -27,7 +27,7 @@ struct DelayData
 	float feedback = 0.f;
 	float minDelayTime = 0.f;
 	float maxDelayDepth = 0.f;
-	int   delayLineLen = 0.f;
+	int   delayLineLen = 0;
 };
 
 //==============================================================================

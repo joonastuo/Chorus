@@ -30,43 +30,43 @@ ChorusAudioProcessor::ChorusAudioProcessor()
 												    0.0,
 												    String(),
 												    AudioProcessorParameter::genericParameter,
-												    [](float value, int maxStringLength) {return static_cast<String>(round(value * 100.f) / 100.f); },
+												    [](float value, int) {return static_cast<String>(round(value * 100.f) / 100.f); },
 												    [](const String& text) {return text.getFloatValue(); }
 													 ),
 			  std::make_unique<AudioParameterFloat>(IDs::wetness,
 													"Mix",
-													NormalisableRange<float>(0.00, 1.0),
+													NormalisableRange<float>(0.f, 1.f),
 												    0.5,
 												    String(),
 												    AudioProcessorParameter::genericParameter,
-												    [](float value, int maxStringLength) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
+												    [](float value, int) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
 												    [](const String& text) {return text.getFloatValue() / 100.f; }
 													 ),
 			  std::make_unique<AudioParameterFloat>(IDs::feedbackL,
 													"Feedback left",
-													NormalisableRange<float>(-0.99, 0.99),
+													NormalisableRange<float>(-0.99f, 0.99f),
 												    0.0,
 												    String(),
 												    AudioProcessorParameter::genericParameter,
-												    [](float value, int maxStringLength) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
+												    [](float value, int) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
 												    [](const String& text) {return text.getFloatValue() / 100.f; }
 													),
 			  std::make_unique<AudioParameterFloat>(IDs::feedbackC,
 													"Feedback center",
-													NormalisableRange<float>(-0.99, 0.99),
+													NormalisableRange<float>(-0.99f, 0.99f),
 												    0.0,
 												    String(),
 												    AudioProcessorParameter::genericParameter,
-												    [](float value, int maxStringLength) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
+												    [](float value, int) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
 												    [](const String& text) {return text.getFloatValue() / 100.f; }
 													),
 			  std::make_unique<AudioParameterFloat>(IDs::feedbackR,
 													"Feedback right",
-													NormalisableRange<float>(-0.99, 0.99),
+													NormalisableRange<float>(-0.99f, 0.99f),
 												    0.0,
 												    String(),
 												    AudioProcessorParameter::genericParameter,
-												    [](float value, int maxStringLength) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
+												    [](float value, int) {return static_cast<String>(round(value * 100.f * 100.f) / 100.f); },
 												    [](const String& text) {return text.getFloatValue() / 100.f; }
 													),
 			 std::make_unique<AudioParameterFloat>(IDs::lfoFreqL,
@@ -75,7 +75,7 @@ ChorusAudioProcessor::ChorusAudioProcessor()
 													 40.0,
 													 String(),
 													 AudioProcessorParameter::genericParameter,
-												     [](float value, int maxStringLength) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
+												     [](float value, int) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
 												     [](const String& text) {return log(50 * text.getFloatValue()) / 0.05521; }),
 			 std::make_unique<AudioParameterFloat>(IDs::lfoFreqC,
 													 "LFO Frequency center",
@@ -83,7 +83,7 @@ ChorusAudioProcessor::ChorusAudioProcessor()
 													 40.0,
 													 String(),
 													 AudioProcessorParameter::genericParameter,
-												     [](float value, int maxStringLength) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
+												     [](float value, int) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
 												     [](const String& text) {return log(50 * text.getFloatValue()) / 0.05521; }),
 			 std::make_unique<AudioParameterFloat>(IDs::lfoFreqR,
 													 "LFO Frequency right",
@@ -91,7 +91,7 @@ ChorusAudioProcessor::ChorusAudioProcessor()
 													 40.0,
 													 String(),
 													 AudioProcessorParameter::genericParameter,
-												     [](float value, int maxStringLength) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
+												     [](float value, int) {return static_cast<String>(round(0.02f * exp(0.05521f * value) * 100.f) / 100.f); },
 												     [](const String& text) {return log(50 * text.getFloatValue()) / 0.05521; }),
 			 std::make_unique<AudioParameterFloat>(IDs::lfoDepthL,
 													 "LFO depth left",
@@ -186,7 +186,7 @@ void ChorusAudioProcessor::changeProgramName (int index, const String& newName)
 //==============================================================================
 void ChorusAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-	mChorus.prepare(sampleRate, samplesPerBlock, getNumOutputChannels());
+	mChorus.prepare(static_cast<float>(sampleRate), samplesPerBlock, getTotalNumInputChannels());
 }
 
 void ChorusAudioProcessor::releaseResources()
