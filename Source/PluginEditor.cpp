@@ -15,7 +15,7 @@
 ChorusAudioProcessorEditor::ChorusAudioProcessorEditor (ChorusAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p), mState(p.getState())
 {
-	int windowWidth  = 2 * mWindowMarginWidth  + 3 * mSliderWidth + 2 * mLabelWidht + 10.f;
+	int windowWidth  = 2 * mWindowMarginWidth  + 3 * mSliderWidth + 2 * mLabelWidht + 10;
 	int windowHeight = 2 * mWindowMarginHeight + 3 * mSliderHeight + mTitleHeight;
     setSize (windowWidth, windowHeight);
 	initialiseGUI();
@@ -36,18 +36,18 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 	// Draw lines to separate sections
 	g.setColour(bgColour.darker(.5));
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
-	auto mixVolumeArea = area.removeFromLeft(mLabelWidht + 5.f);
+	auto mixVolumeArea = area.removeFromLeft(mLabelWidht + 5);
 
 	// Draw line between mix/volume and other controls
 	g.drawLine(Line<float>(mixVolumeArea.getTopRight().toFloat(), mixVolumeArea.getBottomRight().toFloat()), 3.f);
-	area.removeFromLeft(5.f);
+	area.removeFromLeft(5);
 
 	// Draw lines between labels (feedback, frequency, depth)
 	auto labelArea = area.removeFromLeft(mLabelWidht);
 	g.setColour(bgColour.darker(.5));
-	labelArea.removeFromLeft(4.f);
-	labelArea.removeFromRight(8.f);
-	labelArea.removeFromTop(mTitleHeight + 3.f);
+	labelArea.removeFromLeft(4);
+	labelArea.removeFromRight(8);
+	labelArea.removeFromTop(mTitleHeight + 3);
 	g.drawLine(Line<float>(labelArea.getTopLeft().toFloat(), labelArea.getTopRight().toFloat()), 1.f);
 	labelArea.removeFromTop(mSliderHeight);
 	g.drawLine(Line<float>(labelArea.getTopLeft().toFloat(), labelArea.getTopRight().toFloat()), 1.f);
@@ -59,7 +59,7 @@ void ChorusAudioProcessorEditor::paint (Graphics& g)
 	auto topLeft = area.getTopLeft();
 	auto topRight = area.getTopRight();
 	auto bottomLeft = area.getBottomLeft();
-	area.removeFromTop(mTitleHeight + 3.f);
+	area.removeFromTop(mTitleHeight + 3);
 	g.drawLine(topLeft.getX(), topLeft.getY(), bottomLeft.getX(), bottomLeft.getY(), 3.f);
 	g.drawLine(area.getTopLeft().getX(), area.getTopLeft().getY(), area.getTopRight().getX(), area.getTopRight().getY(), 3.f);
 	for (auto i = 0; i < 2; ++i)
@@ -74,7 +74,7 @@ void ChorusAudioProcessorEditor::resized()
 {
 	auto area = getLocalBounds().reduced(mWindowMarginWidth, mWindowMarginHeight);
 	auto mixArea = area.removeFromLeft(jmax(mLabelWidht, mSliderWidth));
-	area.removeFromLeft(10.f);
+	area.removeFromLeft(10);
 
 	// Mix ===============================
 	FlexBox mixBox;
@@ -83,11 +83,11 @@ void ChorusAudioProcessorEditor::resized()
 	mixBox.flexDirection = FlexBox::Direction::column;
 	mixBox.items.addArray(
 		{
-			FlexItem(mMixLabel) .withWidth(mLabelWidht) .withHeight(mLabelHeight),
-			FlexItem(mMixSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			createItem(mMixLabel, mLabelWidht, mLabelHeight),
+			createItem(mMixSlider, mSliderWidth, mSliderHeight)
 		});
 
-	auto gainArea = mixArea.removeFromBottom(mixArea.getHeight() / 2.f);
+	auto gainArea = mixArea.removeFromBottom(static_cast<int>(mixArea.getHeight() / 2.f));
 	mixBox.performLayout(mixArea.toFloat());
 
 
@@ -97,8 +97,8 @@ void ChorusAudioProcessorEditor::resized()
 	gainBox.flexDirection = FlexBox::Direction::column;
 	gainBox.items.addArray(
 		{
-			FlexItem(mVolumeLabel) .withWidth(mLabelWidht) .withHeight(mLabelHeight),
-			FlexItem(mVolumeSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			createItem(mVolumeLabel, mLabelWidht, mLabelHeight),
+			createItem(mVolumeSlider, mSliderWidth, mSliderHeight)
 		});
 
 	gainBox.performLayout(gainArea.toFloat());
@@ -110,9 +110,9 @@ void ChorusAudioProcessorEditor::resized()
 	LCRBox.flexDirection = FlexBox::Direction::row;
 	LCRBox.items.addArray(
 		{
-			FlexItem(mLeftTitleLabel)  .withWidth(mSliderWidth).withHeight(mTitleHeight),
-			FlexItem(mCenterTitleLabel).withWidth(mSliderWidth).withHeight(mTitleHeight),
-			FlexItem(mRightTitleLabel) .withWidth(mSliderWidth).withHeight(mTitleHeight),
+			createItem(mLeftTitleLabel, mSliderWidth, mTitleHeight),
+			createItem(mCenterTitleLabel, mSliderWidth, mTitleHeight),
+			createItem(mRightTitleLabel, mSliderWidth, mTitleHeight),
 		});
 
 	auto LCRArea = area.removeFromTop(mTitleHeight);
@@ -126,9 +126,9 @@ void ChorusAudioProcessorEditor::resized()
 	titleBox.flexDirection = FlexBox::Direction::column;
 	titleBox.items.addArray(
 		{
-			FlexItem(mFreqTitleLabel)    .withWidth(mLabelWidht).withHeight(mSliderHeight),
-			FlexItem(mFeedbackTitleLabel).withWidth(mLabelWidht).withHeight(mSliderHeight),
-			FlexItem(mDepthTitleLabel)   .withWidth(mLabelWidht).withHeight(mSliderHeight)
+			createItem(mFreqTitleLabel, mLabelWidht, mSliderHeight),
+			createItem(mFeedbackTitleLabel, mLabelWidht, mSliderHeight),
+			createItem(mDepthTitleLabel, mLabelWidht, mSliderHeight)
 		});
 	auto titleArea = area.removeFromLeft(mLabelWidht);
 	titleBox.performLayout(titleArea.toFloat());
@@ -140,9 +140,9 @@ void ChorusAudioProcessorEditor::resized()
 	leftBox.flexDirection = FlexBox::Direction::column;
 	leftBox.items.addArray(
 		{
-			FlexItem(mLfoFreqLSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthLSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			createItem(mLfoFreqLSlider, mSliderWidth, mSliderHeight),
+			createItem(mFeedbackLSlider, mSliderWidth, mSliderHeight),
+			createItem(mLfoDepthLSlider, mSliderWidth, mSliderHeight)
 		});
 
 	auto leftArea = area.removeFromLeft(mSliderWidth);
@@ -155,9 +155,9 @@ void ChorusAudioProcessorEditor::resized()
 	centerBox.flexDirection = FlexBox::Direction::column;
 	centerBox.items.addArray(
 		{
-			FlexItem(mLfoFreqCSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthCSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			createItem(mLfoFreqCSlider, mSliderWidth, mSliderHeight),
+			createItem(mFeedbackCSlider, mSliderWidth, mSliderHeight),
+			createItem(mLfoDepthCSlider, mSliderWidth, mSliderHeight)
 		});
 	auto centerArea = area.removeFromLeft(mSliderWidth);
 	centerBox.performLayout(centerArea.toFloat());
@@ -169,12 +169,22 @@ void ChorusAudioProcessorEditor::resized()
 	rightBox.flexDirection = FlexBox::Direction::column;
 	rightBox.items.addArray(
 		{
-			FlexItem(mLfoFreqRSlider) .withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mFeedbackRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight),
-			FlexItem(mLfoDepthRSlider).withWidth(mSliderWidth).withHeight(mSliderHeight)
+			createItem(mLfoFreqRSlider, mSliderWidth, mSliderHeight),
+			createItem(mFeedbackRSlider, mSliderWidth, mSliderHeight),
+			createItem(mLfoDepthRSlider, mSliderWidth, mSliderHeight)
 		});
 	auto rightArea = area.removeFromLeft(mSliderWidth);
 	rightBox.performLayout(rightArea.toFloat());
+}
+
+FlexItem ChorusAudioProcessorEditor::createItem(Component & c, const int & width, const int & height)
+{
+	return FlexItem(c).withWidth(static_cast<float>(width)).withHeight(static_cast<float>(height));
+}
+
+FlexItem ChorusAudioProcessorEditor::createItem(FlexBox & fb, const int & width, const int & height)
+{
+	return FlexItem(fb).withWidth(static_cast<float>(width)).withHeight(static_cast<float>(height));
 }
 
 //==============================================================================

@@ -61,6 +61,7 @@ private:
 
 	float mMaxSqr = 0.f;
 	float mMaxSaw = 0.f;
+	float mMaxTri = 0.f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LFO)
 };

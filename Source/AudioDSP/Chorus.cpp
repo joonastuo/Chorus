@@ -144,9 +144,9 @@ void Chorus::getLfoFreq(float * lfoFreq)
 	float lfoPercentageC = *mState.getRawParameterValue(IDs::lfoFreqC);
 	float lfoPercentageR = *mState.getRawParameterValue(IDs::lfoFreqR);
 
-	lfoFreq[0] = 0.02 * exp(lfoPercentageL * 0.05521f);
-	lfoFreq[1] = 0.02 * exp(lfoPercentageC * 0.05521f);
-	lfoFreq[2] = 0.02 * exp(lfoPercentageR * 0.05521f);
+	lfoFreq[0] = 0.02f * exp(lfoPercentageL * 0.05521f);
+	lfoFreq[1] = 0.02f * exp(lfoPercentageC * 0.05521f);
+	lfoFreq[2] = 0.02f * exp(lfoPercentageR * 0.05521f);
 }
 
 //==============================================================================
@@ -168,6 +168,6 @@ void Chorus::getLfoDepth(float * lfoDepth)
 float Chorus::getVolume()
 {
 	float volumedB = *mState.getRawParameterValue(IDs::volume);
-	return pow(10, volumedB / 20.f);
+	return static_cast<float>(pow(10, volumedB / 20.f));
 }
 

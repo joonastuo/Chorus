@@ -29,8 +29,8 @@ void ModDelay::prepare(DelayData data)
 	mDelayLine.resize(data.delayLineLen);
 	mDelayLine.clear();
 	// LFO
-	mLFO.prepare(mSampleRate, mSamplesPerBlock);
-	mLFO.setWaveform(Waveforms::tri);
+	mLFO.prepare(mSampleRate, static_cast<float>(mSamplesPerBlock));
+	mLFO.setWaveform(Waveforms::sine);
 	mLFO.setUnipolar(true);
 	mLFO.setPhase(data.lfoPhase);
 	mLFO.setFreq(data.lfoFreq);
